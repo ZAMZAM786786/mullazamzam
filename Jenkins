@@ -1,0 +1,35 @@
+node{
+    def mavenHome = tool name: "maven3.9.9"
+    stage('CheckOutCode')
+    {
+        git 'https://github.com/ZAMZAM786786/mullazamzam.git'
+    }
+    stage('Build')
+    {
+        sh "${mavenHome}/bin/mvn clean package"
+    }
+    stage('SonarQube')
+    {
+        sh "${mavenHome}/bin/mvn clean sonar:sonar"
+    }
+    stage('Artifact')
+    {
+        sh "${mavenHome}/bin/mvn clean deploy"
+    }
+    stage('TOMATC')
+    {
+        sshagent(['39c73a23-7eea-42e8-b582-00cfee8d9137']) {
+    // some block
+        }
+        sh "scp target/maven-application.war ec2-user@21213.323.12:"
+    }
+    stage('EmailID')
+    {
+        mail bcc: '', body: '''Hi,
+
+     Executed
+
+     Regards,
+     Ashfak''', cc: 'mullaahmad111@gmail.com', from: '', replyTo: '', subject: 'EC2-user', to: 'ashfakmulla778@gmail.com'
+    }
+}
